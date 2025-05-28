@@ -7,7 +7,7 @@ declare module "icu-iana-from-windows" {
    * @returns The corresponding IANA timezone identifier (e.g., "America/Los_Angeles").
    */
   export function convertWindowsToIana(
-    windowsTimezon: string,
+    windowsTimezone: string,
     territory?: string
   ): string;
 }

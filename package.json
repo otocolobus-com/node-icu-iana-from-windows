@@ -1,6 +1,6 @@
 {
   "name": "@otocolobus-com/node-icu-iana-from-windows",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "types": "index.d.ts",
   "repository": {

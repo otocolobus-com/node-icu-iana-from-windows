@@ -75,7 +75,7 @@ jobs:
 
       - run: |
           mkdir -p prebuilds
-          mv all-prebuilt-binaries/prebuild-*/* prebuilds/
+          mv all-prebuilt-binaries/prebuilt-binaries-*/* prebuilds/
 
       - uses: actions/setup-node@v4
         with:
@@ -100,7 +100,7 @@ jobs:
 
       - run: |
           mkdir -p release
-          cp -r package.json index.js index.d.ts README.md LICENSE binding.gyp prebuilds/ release/
+          cp -r package.json package-lock.json index.js index.d.ts README.md LICENSE binding.gyp prebuilds/ release/
           zip -r release/otocolobus-com-icu-iana-from-windows-v$(node -p "require('./package.json').version").zip release/
 
       - uses: softprops/action-gh-release@v1
