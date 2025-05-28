@@ -16,8 +16,8 @@ jobs:
 
       - if: matrix.os == 'macos-latest'
         run: |
-          brew update && brew install icu4c
-          echo "PKG_CONFIG_PATH=$(brew --prefix icu4c)/lib/pkgconfig" >> $GITHUB_ENV
+          brew update && brew install icu4c@74 -f
+          echo "PKG_CONFIG_PATH=$(brew --prefix icu4c@74)/lib/pkgconfig" >> $GITHUB_ENV
 
       - if: matrix.os == 'ubuntu-latest'
         run: |
@@ -33,15 +33,11 @@ jobs:
           vcpkg integrate install
           $env:VCPKG_DEFAULT_TRIPLET = 'x64-windows'
           vcpkg install icu[core,tools] --triplet $env:VCPKG_DEFAULT_TRIPLET
-          vcpkg install pkgconf --triplet $env:VCPKG_DEFAULT_TRIPLET
-          $env:PKG_CONFIG_PATH = "$env:VCPKG_ROOT\installed\$env:VCPKG_DEFAULT_TRIPLET\lib\pkgconfig"
-          $pkgConfigPath = $env:PKG_CONFIG_PATH -Replace '\\', '/'
-          echo "PKG_CONFIG_PATH=$pkgConfigPath" >> $env:GITHUB_ENV
-          echo "PATH=$env:VCPKG_ROOT\installed\$env:VCPKG_DEFAULT_TRIPLET\tools\pkgconf;$env:PATH" >> $env:GITHUB_ENV
+          echo "VCPKG_DEFAULT_TRIPLET=${env:VCPKG_DEFAULT_TRIPLET}" >> $env:GITHUB_ENV
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
+          node-version: "18.x"
           registry-url: "https://npm.pkg.github.com"
           scope: "@otocolobus-com"
 
@@ -83,7 +79,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
+          node-version: "18.x"
           registry-url: "https://npm.pkg.github.com"
           scope: "@otocolobus-com"
 
