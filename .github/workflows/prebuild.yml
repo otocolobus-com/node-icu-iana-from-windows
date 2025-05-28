@@ -1,0 +1,115 @@
+name: Distribute package
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - if: matrix.os == 'macos-latest'
+        run: |
+          brew update && brew install icu4c
+
+      - if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update && sudo apt-get install -y libicu-dev pkg-config
+
+      - if: matrix.os == 'windows-latest'
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: 3425f537d2f01c761d2d2cff59a7577eb4f568c0
+
+      - if: matrix.os == 'windows-latest'
+        run: |
+          vcpkg integrate install
+          $env:VCPKG_DEFAULT_TRIPLET = 'x64-windows'
+          vcpkg install icu[core,tools] --triplet $env:VCPKG_DEFAULT_TRIPLET
+          vcpkg install pkgconf --triplet $env:VCPKG_DEFAULT_TRIPLET
+          $env:PKG_CONFIG_PATH = "$env:VCPKG_ROOT\installed\$env:VCPKG_DEFAULT_TRIPLET\lib\pkgconfig"
+          $pkgConfigPath = $env:PKG_CONFIG_PATH -Replace '\\', '/'
+          echo "PKG_CONFIG_PATH=$pkgConfigPath" >> $env:GITHUB_ENV
+          echo "PATH=$env:VCPKG_ROOT\installed\$env:VCPKG_DEFAULT_TRIPLET\tools\pkgconf;$env:PATH" >> $env:GITHUB_ENV
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@otocolobus-com"
+
+      - run: npm ci --prefer-offline --no-audit --progress=false --ignore-scripts
+
+      # remove prebuilds to avoid conflicts
+      - run: rm -rf prebuilds/
+        if: matrix.os != 'windows-latest'
+
+      - run: |
+          if (Test-Path prebuilds) {
+            Remove-Item -Recurse -Force prebuilds
+          }
+        if: matrix.os == 'windows-latest'
+
+      - run: npm run prebuild
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prebuilt-binaries-${{ runner.os }}
+          path: prebuilds/
+          retention-days: 7
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: all-prebuilt-binaries
+
+      - run: |
+          mkdir -p prebuilds
+          mv all-prebuilt-binaries/prebuild-*/* prebuilds/
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@otocolobus-com"
+
+      - run: |
+          npm version patch --no-git-tag-version
+          npm ci --prefer-offline --no-audit --progress=false --ignore-scripts
+
+      - run: |
+          git config --local user.name "GitHub Actions"
+          git add prebuilds/
+          git add package.json package-lock.json
+          git commit -m "Update prebuilt binaries for version $(node -p "require('./package.json').version") [skip ci]" || echo "No changes to commit"
+
+      - run: |
+          npm publish --access restricted
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: |
+          mkdir -p release
+          cp -r package.json index.js index.d.ts README.md LICENSE binding.gyp prebuilds/ release/
+          zip -r release/otocolobus-com-icu-iana-from-windows-v$(node -p "require('./package.json').version").zip release/
+
+      - uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v$(node -p "require('./package.json').version")
+          target_commitish: main
+          name: Release v$(node -p "require('./package.json').version")
+          files: release/otocolobus-com-icu-iana-from-windows-v$(node -p "require('./package.json').version").zip
+
+      - run: |
+          git push

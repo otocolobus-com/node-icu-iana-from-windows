@@ -13,7 +13,8 @@
   "homepage": "https://github.com/otocolobus-com/node-icu-iana-from-windows",
   "scripts": {
     "prebuild": "prebuildify --napi --strip",
-    "install": "node-gyp-build"
+    "install": "exit 0",
+    "postinstall": "node-gyp-build"
   },
   "files": [
     "index.js",
