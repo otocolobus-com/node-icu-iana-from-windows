@@ -99,16 +99,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: |
-          mkdir -p release
-          cp -r package.json package-lock.json index.js index.d.ts README.md LICENSE binding.gyp prebuilds/ release/
-          zip -r release/otocolobus-com-icu-iana-from-windows-v$(node -p "require('./package.json').version").zip release/
-
-      - uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v$(node -p "require('./package.json').version")
-          target_commitish: main
-          name: Release v$(node -p "require('./package.json').version")
-          files: release/otocolobus-com-icu-iana-from-windows-v$(node -p "require('./package.json').version").zip
-
-      - run: |
+          git tag v$(node -p "require('./package.json').version")
           git push
+          git push --tags
