@@ -7,42 +7,9 @@
             "defines": ["NAPI_DISABLE_CPP_EXCEPTIONS"],
             "include_dirs": [
                 "./node_modules/node-addon-api",
+                "<!(pkg-config --cflags-only-I icu-i18n | sed 's/-I//g')",
             ],
-            "conditions": [
-                [
-                    "OS == 'win'",
-                    {
-                        "include_dirs": [
-                            "<!(pkg-config --cflags-only-I icu-i18n | sed 's/-I//g')",
-                        ],
-                        "libraries": [
-                            "<!(pkg-config --libs-only-L icu-i18n)",
-                        ],
-                    },
-                ],
-                [
-                    "OS == 'linux'",
-                    {
-                        "include_dirs": [
-                            "<!(pkg-config --cflags-only-I icu-i18n | sed 's/-I//g')",
-                        ],
-                        "libraries": [
-                            "<!(pkg-config --libs-only-L icu-i18n)",
-                        ],
-                    },
-                ],
-                [
-                    "OS == 'mac'",
-                    {
-                        "include_dirs": [
-                            "<!(brew --prefix icu4c)/include",
-                        ],
-                        "libraries": [
-                            "-L<!(brew --prefix icu4c)/lib",
-                        ],
-                    },
-                ],
-            ],
+            "libraries": [],
         }
     ],
 }

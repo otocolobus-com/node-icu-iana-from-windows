@@ -14,7 +14,9 @@
   "scripts": {
     "prebuild": "prebuildify --napi --strip",
     "install": "exit 0",
-    "postinstall": "node-gyp-build"
+    "postinstall": "node-gyp-build",
+    "pretest": "node-gyp-build",
+    "test": "node index.test.js"
   },
   "files": [
     "index.js",
