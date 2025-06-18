@@ -53,8 +53,8 @@ jobs:
 
       - run: npm run test
 
-  publish:
-    name: Publish package
+  publish_github_packages:
+    name: Publish package to GitHub Packages
     runs-on: ubuntu-24.04
     needs: build
     steps:
@@ -68,7 +68,7 @@ jobs:
 
       - run: |
           npm version patch --no-git-tag-version
-          npm ci --prefer-offline --no-audit --progress=false --ignore-scripts
+          npm install --prefer-offline --no-audit --progress=false --ignore-scripts
 
       - run: |
           git config --local user.name "GitHub Actions"
@@ -84,3 +84,25 @@ jobs:
           git tag v$(node -p "require('./package.json').version")
           git push
           git push --tags
+
+  publish_npm:
+    name: Publish package to npm
+    runs-on: ubuntu-24.04
+    needs: publish_github_packages
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18.x"
+          registry-url: "https://registry.npmjs.org/"
+          scope: "@otocolobus"
+
+      - run: |
+          npm pkg set name="$(node -p "require('./package.json').name.replace('@otocolobus-com/', '@otocolobus/')")"
+          npm install --prefer-offline --no-audit --progress=false --ignore-scripts
+
+      - run: |
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_REGISTRY_TOKEN }}
