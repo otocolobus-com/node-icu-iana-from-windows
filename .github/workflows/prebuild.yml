@@ -59,6 +59,8 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -91,6 +93,13 @@ jobs:
     needs: publish_github_packages
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch latest commit from main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
 
       - uses: actions/setup-node@v4
         with:

@@ -12,8 +12,7 @@
   },
   "homepage": "https://github.com/otocolobus-com/node-icu-iana-from-windows",
   "scripts": {
-    "install": "exit 0",
-    "postinstall": "node-gyp rebuild",
+    "install": "node-gyp rebuild",
     "pretest": "node-gyp rebuild",
     "test": "node index.test.js"
   },
