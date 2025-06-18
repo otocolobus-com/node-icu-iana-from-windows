@@ -2,6 +2,14 @@ name: Distribute package
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/prebuild.yml"
 
 jobs:
   build:
