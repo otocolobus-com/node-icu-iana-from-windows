@@ -59,7 +59,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: prebuilt-binaries-${{ runner.os }}
+          name: prebuilt-binaries-${{ matrix.os }}
           path: prebuilds/
           retention-days: 7
 
