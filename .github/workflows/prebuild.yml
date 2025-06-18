@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
+    name: Build and test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -41,42 +41,16 @@ jobs:
           registry-url: "https://npm.pkg.github.com"
           scope: "@otocolobus-com"
 
-      - run: npm ci --prefer-offline --no-audit --progress=false --ignore-scripts
-
-      # remove prebuilds to avoid conflicts
-      - run: rm -rf prebuilds/
-        if: matrix.os != 'windows-2025'
-
-      - run: |
-          if (Test-Path prebuilds) {
-            Remove-Item -Recurse -Force prebuilds
-          }
-        if: matrix.os == 'windows-2025'
-
-      - run: npm run prebuild
+      - run: npm ci --prefer-offline --no-audit --progress=false
 
       - run: npm run test
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: prebuilt-binaries-${{ matrix.os }}
-          path: prebuilds/
-          retention-days: 7
-
   publish:
+    name: Publish package
     runs-on: ubuntu-24.04
     needs: build
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
-        with:
-          path: all-prebuilt-binaries
-
-      - run: |
-          mkdir -p prebuilds
-          rm -rf prebuilds/*
-          mv all-prebuilt-binaries/prebuilt-binaries-*/* prebuilds/
 
       - uses: actions/setup-node@v4
         with:
@@ -90,12 +64,11 @@ jobs:
 
       - run: |
           git config --local user.name "GitHub Actions"
-          git add prebuilds/
           git add package.json package-lock.json
-          git commit -m "Update prebuilt binaries for version $(node -p "require('./package.json').version") [skip ci]" || echo "No changes to commit"
+          git commit -m "Release new version $(node -p "require('./package.json').version") [skip ci]" || echo "No changes to commit"
 
       - run: |
-          npm publish --access restricted
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
