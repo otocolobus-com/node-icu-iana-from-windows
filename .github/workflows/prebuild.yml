@@ -9,26 +9,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-24.04, macos-15, windows-2025, ubuntu-24.04-arm]
 
     steps:
       - uses: actions/checkout@v4
 
-      - if: matrix.os == 'macos-latest'
+      - if: matrix.os == 'macos-15'
         run: |
           brew update && brew install icu4c@74 -f
           echo "PKG_CONFIG_PATH=$(brew --prefix icu4c@74)/lib/pkgconfig" >> $GITHUB_ENV
 
-      - if: matrix.os == 'ubuntu-latest'
+      - if: matrix.os == 'ubuntu-24.04' || matrix.os == 'ubuntu-24.04-arm'
         run: |
           sudo apt-get update && sudo apt-get install -y libicu-dev pkg-config
 
-      - if: matrix.os == 'windows-latest'
+      - if: matrix.os == 'windows-2025'
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgGitCommitId: 3425f537d2f01c761d2d2cff59a7577eb4f568c0
 
-      - if: matrix.os == 'windows-latest'
+      - if: matrix.os == 'windows-2025'
         run: |
           vcpkg integrate install
           $env:VCPKG_DEFAULT_TRIPLET = 'x64-windows'
@@ -45,13 +45,13 @@ jobs:
 
       # remove prebuilds to avoid conflicts
       - run: rm -rf prebuilds/
-        if: matrix.os != 'windows-latest'
+        if: matrix.os != 'windows-2025'
 
       - run: |
           if (Test-Path prebuilds) {
             Remove-Item -Recurse -Force prebuilds
           }
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2025'
 
       - run: npm run prebuild
 
@@ -64,7 +64,7 @@ jobs:
           retention-days: 7
 
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     steps:
       - uses: actions/checkout@v4
