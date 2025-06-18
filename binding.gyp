@@ -5,9 +5,7 @@
             "sources": ["src/icu-iana-from-windows.cc"],
             "cflags_cc": ["-std=c++17"],
             "defines": ["NAPI_DISABLE_CPP_EXCEPTIONS"],
-            "include_dirs": [
-                "./node_modules/node-addon-api",
-            ],
+            "include_dirs": ["<!(node -p \"require('node-addon-api').include_dir\")"],
             "libraries": [],
             "conditions": [
                 [

@@ -38,11 +38,9 @@
   "author": "Otocolobus Sp. z o.o.",
   "license": "MIT",
   "description": "",
-  "devDependencies": {
-    "node-addon-api": "^8.4.0",
-    "node-gyp": "^11.2.0"
-  },
   "dependencies": {
+    "node-addon-api": "^8.4.0",
+    "node-gyp": "^11.2.0",
     "node-gyp-build": "^4.8.4"
   }
 }
