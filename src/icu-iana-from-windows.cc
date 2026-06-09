@@ -1,9 +1,27 @@
 #include <napi.h>
+#include <unordered_map>
 #include <unicode/timezone.h>
 #include <unicode/unistr.h>
 
 namespace icu_iana_from_windows
 {
+    std::string GetCustomIanaMapping(const std::string &windowsTimezoneId)
+    {
+        static const std::unordered_map<std::string, std::string> customIanaMappings = {
+            {"Microsoft/Utc", "Etc/UTC"},
+            {"tzone://Microsoft/Utc", "Etc/UTC"},
+            {"Utc", "Etc/UTC"},
+        };
+
+        const auto mapping = customIanaMappings.find(windowsTimezoneId);
+        if (mapping != customIanaMappings.end())
+        {
+            return mapping->second;
+        }
+
+        return "";
+    }
+
     Napi::String ConvertWindowsToIANA(const Napi::CallbackInfo &info)
     {
         Napi::Env env = info.Env();
@@ -25,6 +43,12 @@ namespace icu_iana_from_windows
         if (info.Length() > 1 && info[1].IsString())
         {
             territory = info[1].As<Napi::String>().Utf8Value();
+        }
+
+        std::string customIanaMappingResult = GetCustomIanaMapping(windowsTimezoneId);
+        if (!customIanaMappingResult.empty())
+        {
+            return Napi::String::New(env, customIanaMappingResult);
         }
 
         icu::UnicodeString ianaId;

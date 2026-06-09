@@ -36,6 +36,16 @@ test("should map Windows timezones to IANA timezones based on region", async (t)
   );
 });
 
+test("should map custom Microsoft UTC timezone aliases", async (t) => {
+  const binding = require(".");
+  assert.equal(binding.convertWindowsToIana("Microsoft/Utc"), "Etc/UTC");
+  assert.equal(
+    binding.convertWindowsToIana("tzone://Microsoft/Utc"),
+    "Etc/UTC",
+  );
+  assert.equal(binding.convertWindowsToIana("Utc"), "Etc/UTC");
+});
+
 test("should throw an error for empty timezone", async (t) => {
   const binding = require(".");
   assert.throws(
