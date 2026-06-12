@@ -112,6 +112,9 @@ jobs:
           registry-url: "https://registry.npmjs.org/"
           scope: "@otocolobus"
 
+      - name: Upgrade npm
+        run: npm install --global npm@latest
+
       - run: |
           npm pkg set name="$(node -p "require('./package.json').name.replace('@otocolobus-com/', '@otocolobus/')")"
           npm install --prefer-offline --no-audit --progress=false --ignore-scripts
