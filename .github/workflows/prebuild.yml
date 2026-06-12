@@ -17,17 +17,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-15, windows-2025, ubuntu-24.04-arm]
+        os: [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - if: matrix.os == 'macos-15'
+      - if: matrix.os == 'macos-latest'
         run: |
           brew update && brew install icu4c@78 -f
           echo "PKG_CONFIG_PATH=$(brew --prefix icu4c@78)/lib/pkgconfig" >> $GITHUB_ENV
 
-      - if: matrix.os == 'ubuntu-24.04' || matrix.os == 'ubuntu-24.04-arm'
+      - if: matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-24.04-arm'
         run: |
           sudo apt-get update && sudo apt-get install -y libicu-dev pkg-config
 
@@ -43,9 +43,9 @@ jobs:
           vcpkg install icu[core,tools] --triplet $env:VCPKG_DEFAULT_TRIPLET
           echo "VCPKG_DEFAULT_TRIPLET=${env:VCPKG_DEFAULT_TRIPLET}" >> $env:GITHUB_ENV
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: "18.x"
+          node-version: "22.x"
           registry-url: "https://npm.pkg.github.com"
           scope: "@otocolobus-com"
 
@@ -58,13 +58,13 @@ jobs:
     runs-on: ubuntu-24.04
     needs: build
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: "18.x"
+          node-version: "22.x"
           registry-url: "https://npm.pkg.github.com"
           scope: "@otocolobus-com"
 
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: publish_github_packages
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -101,9 +101,9 @@ jobs:
           git fetch origin main
           git reset --hard origin/main
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: "18.x"
+          node-version: "22.x"
           registry-url: "https://registry.npmjs.org/"
           scope: "@otocolobus"
 
