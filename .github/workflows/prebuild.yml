@@ -11,6 +11,10 @@ on:
       - "package-lock.json"
       - ".github/workflows/prebuild.yml"
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build:
     name: Build and test on ${{ matrix.os }}
@@ -113,5 +117,3 @@ jobs:
 
       - run: |
           npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_REGISTRY_TOKEN }}
